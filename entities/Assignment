@@ -1,0 +1,36 @@
+{
+  "name": "Assignment",
+  "type": "object",
+  "properties": {
+    "session_name": {
+      "type": "string",
+      "description": "Name der Zuordnungssitzung"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Datum der Zuordnung"
+    },
+    "assignments": {
+      "type": "array",
+      "description": "Liste der Zuordnungen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "godparent_name": {
+            "type": "string"
+          },
+          "godchild_name": {
+            "type": "string"
+          },
+          "godchild_is_youth": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "session_name"
+  ]
+}
