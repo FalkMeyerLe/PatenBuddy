@@ -1,0 +1,23 @@
+{
+  "name": "Player",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name des Spielers"
+    },
+    "is_youth_player": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ist der Spieler ein Jugendspieler?"
+    },
+    "is_present": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ist der Spieler anwesend?"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
