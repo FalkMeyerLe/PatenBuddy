@@ -1,0 +1,37 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "Assignment",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "session_date",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "session_name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Player",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "is_present",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "is_youth_player",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
