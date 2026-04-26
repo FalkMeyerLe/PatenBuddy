@@ -1,71 +1,63 @@
-const readCollection = (key) => {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : [];
-    } catch {
-        return [];
-    }
-};
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    orderBy,
+    query,
+    updateDoc,
+} from "firebase/firestore";
+import { db } from "@/firebase";
 
-const writeCollection = (key, value) => {
-    localStorage.setItem(key, JSON.stringify(value));
-};
+const playersCollection = collection(db, "players");
+const assignmentsCollection = collection(db, "assignments");
 
-const createId = () => crypto.randomUUID();
+const addCreatedDate = (data) => ({
+    ...data,
+    created_date: new Date().toISOString(),
+});
+
+const toEntity = (snapshot) => ({
+    id: snapshot.id,
+    ...snapshot.data(),
+});
 
 export const localDb = {
     players: {
-        list() {
-            return readCollection("players").sort((a, b) => a.name.localeCompare(b.name));
+        async list() {
+            const snapshot = await getDocs(query(playersCollection, orderBy("name", "asc")));
+            return snapshot.docs.map(toEntity);
         },
-        create(data) {
-            const items = readCollection("players");
-            const newItem = {
-                id: createId(),
-                ...data,
-                created_date: new Date().toISOString(),
-            };
-            items.push(newItem);
-            writeCollection("players", items);
-            return newItem;
+        async create(data) {
+            const payload = addCreatedDate(data);
+            const ref = await addDoc(playersCollection, payload);
+            return { id: ref.id, ...payload };
         },
-        update(id, data) {
-            const items = readCollection("players");
-            const updated = items.map((item) =>
-                item.id === id ? { ...item, ...data } : item
-            );
-            writeCollection("players", updated);
-            return updated.find((item) => item.id === id);
+        async update(id, data) {
+            await updateDoc(doc(db, "players", id), data);
+            return { id, ...data };
         },
-        delete(id) {
-            const items = readCollection("players");
-            const filtered = items.filter((item) => item.id !== id);
-            writeCollection("players", filtered);
+        async delete(id) {
+            await deleteDoc(doc(db, "players", id));
             return true;
         },
     },
 
     assignments: {
-        list() {
-            return readCollection("assignments").sort(
-                (a, b) => new Date(b.created_date) - new Date(a.created_date)
+        async list() {
+            const snapshot = await getDocs(
+                query(assignmentsCollection, orderBy("created_date", "desc"))
             );
+            return snapshot.docs.map(toEntity);
         },
-        create(data) {
-            const items = readCollection("assignments");
-            const newItem = {
-                id: createId(),
-                ...data,
-                created_date: new Date().toISOString(),
-            };
-            items.push(newItem);
-            writeCollection("assignments", items);
-            return newItem;
+        async create(data) {
+            const payload = addCreatedDate(data);
+            const ref = await addDoc(assignmentsCollection, payload);
+            return { id: ref.id, ...payload };
         },
-        delete(id) {
-            const items = readCollection("assignments");
-            const filtered = items.filter((item) => item.id !== id);
-            writeCollection("assignments", filtered);
+        async delete(id) {
+            await deleteDoc(doc(db, "assignments", id));
             return true;
         },
     },
