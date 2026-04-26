@@ -7,7 +7,7 @@ import { de } from "date-fns/locale";
 import { Calendar, ChevronRight, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function HistoryList({ sessions, onSelect, onDelete, selectedId }) {
+export default function HistoryList({ sessions, onSelect, onDelete, selectedId, readOnly = false }) {
     if (!sessions || sessions.length === 0) {
         return (
             <div className="text-center py-12 text-slate-400">
@@ -45,6 +45,7 @@ export default function HistoryList({ sessions, onSelect, onDelete, selectedId }
                         <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-xs">
                             {session.assignments?.length || 0} Zuordnungen
                         </Badge>
+                        {!readOnly && (
                         <Button
                             variant="ghost"
                             size="icon"
@@ -56,6 +57,7 @@ export default function HistoryList({ sessions, onSelect, onDelete, selectedId }
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>
+                        )}
                         <ChevronRight className="w-4 h-4 text-slate-400" />
                     </Card>
                 </motion.div>
