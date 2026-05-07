@@ -4,10 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shuffle, Save, AlertCircle, Users, History, Download } from "lucide-react";
+import { Shuffle, Save, AlertCircle, Users, History, Download, LogIn, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useAuth } from "@/context/AuthContext";
 
 import PlayerTable from "../components/players/PlayerTable";
 import AssignmentResult from "../components/assignment/AssignmentResult";
@@ -20,6 +21,7 @@ export default function Home() {
     const [selectedSession, setSelectedSession] = useState(null);
     const [sessionName, setSessionName] = useState("");
     const queryClient = useQueryClient();
+    const { isOwner, login, logout, authError } = useAuth();
 
     const { data: players = [] } = useQuery({
         queryKey: ["players"],
@@ -107,12 +109,30 @@ export default function Home() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
             <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
                 <div className="mb-10">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
-                        Patenschaft-Zuordnung
-                    </h1>
-                    <p className="text-slate-500 mt-2 text-base">
-                        Zufällige Zuordnung von Patenkindern für anwesende Spieler
-                    </p>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+                                Patenschaft-Zuordnung
+                            </h1>
+                            <p className="text-slate-500 mt-2 text-base">
+                                Zufällige Zuordnung von Patenkindern für anwesende Spieler
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                            {isOwner ? (
+                                <Button variant="outline" size="sm" onClick={logout} className="gap-2 text-slate-600">
+                                    <LogOut className="w-4 h-4" /> Abmelden
+                                </Button>
+                            ) : (
+                                <Button variant="outline" size="sm" onClick={login} className="gap-2 text-slate-600">
+                                    <LogIn className="w-4 h-4" /> Anmelden
+                                </Button>
+                            )}
+                            {authError && (
+                                <p className="text-xs text-red-500 max-w-[220px] text-right">{authError}</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -134,6 +154,7 @@ export default function Home() {
                             onAdd={(data) => addPlayer.mutate(data)}
                             onUpdate={(id, data) => updatePlayer.mutate({ id, data })}
                             onDelete={(id) => deletePlayer.mutate(id)}
+                            readOnly={!isOwner}
                         />
 
                         <div className="pt-4 border-t border-slate-200">
@@ -150,12 +171,12 @@ export default function Home() {
                             )}
                             <Button
                                 onClick={handleGenerate}
-                                disabled={!canGenerate}
+                                disabled={!canGenerate || !isOwner}
                                 size="lg"
                                 className="w-full h-14 bg-slate-800 hover:bg-slate-700 text-base font-semibold tracking-wide disabled:opacity-40"
                             >
                                 <Shuffle className="w-5 h-5 mr-2" />
-                                Zuordnung starten
+                                {isOwner ? "Zuordnung starten" : "Anmelden zum Starten"}
                             </Button>
                         </div>
                     </TabsContent>
