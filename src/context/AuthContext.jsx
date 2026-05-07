@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
         try {
             await signInWithGoogle();
         } catch (error) {
-            if (error.code !== "auth/popup-closed-by-user") {
+            if (error?.code !== "auth/popup-closed-by-user") {
                 setAuthError("Anmeldung fehlgeschlagen. Bitte versuche es erneut.");
             }
         }
@@ -59,3 +59,4 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
+
