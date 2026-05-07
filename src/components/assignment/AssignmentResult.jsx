@@ -10,11 +10,16 @@ export default function AssignmentResult({ assignments, stats }) {
     const seniorAssignments = assignments.filter(a => !a.godchild_is_youth);
     const youthAssignments = assignments.filter(a => a.godchild_is_youth);
 
-    // Group youth by godparent
-    const youthByGodparent = {};
-    youthAssignments.forEach(a => {
-        if (!youthByGodparent[a.godparent_name]) youthByGodparent[a.godparent_name] = [];
-        youthByGodparent[a.godparent_name].push(a.godchild_name);
+    const assignmentsByGodparent = {};
+    assignments.forEach((assignment) => {
+        if (!assignmentsByGodparent[assignment.godparent_name]) {
+            assignmentsByGodparent[assignment.godparent_name] = [];
+        }
+
+        assignmentsByGodparent[assignment.godparent_name].push({
+            name: assignment.godchild_name,
+            isYouth: !!assignment.godchild_is_youth,
+        });
     });
 
     return (
@@ -85,30 +90,38 @@ export default function AssignmentResult({ assignments, stats }) {
                             </motion.div>
                         ))}
                     </div>
-
-                    {/* Summary per godparent */}
-                    <div className="mt-6">
-                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                            Übersicht pro Pate
-                        </h4>
-                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {Object.entries(youthByGodparent).map(([godparent, children]) => (
-                                <div key={godparent} className="bg-slate-50 rounded-xl p-4">
-                                    <p className="font-semibold text-slate-800 text-sm">{godparent}</p>
-                                    <div className="mt-2 space-y-1">
-                                        {children.map((child, i) => (
-                                            <div key={i} className="flex items-center gap-2 text-sm text-amber-700">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                                {child}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
             )}
+
+            {/* Summary per godparent */}
+            <div>
+                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                    Übersicht pro Pate
+                </h4>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {Object.entries(assignmentsByGodparent).map(([godparent, children]) => (
+                        <div key={godparent} className="bg-slate-50 rounded-xl p-4">
+                            <p className="font-semibold text-slate-800 text-sm">{godparent}</p>
+                            <div className="mt-2 space-y-2">
+                                {children.map((child, i) => (
+                                    <div key={`${godparent}-${child.name}-${i}`} className="flex items-center gap-2 text-sm">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${child.isYouth ? "bg-amber-400" : "bg-slate-400"}`} />
+                                        <span className={child.isYouth ? "text-amber-700" : "text-slate-700"}>
+                                            {child.name}
+                                        </span>
+                                        <Badge
+                                            variant={child.isYouth ? undefined : "secondary"}
+                                            className={child.isYouth ? "ml-auto bg-amber-100 text-amber-700 border-amber-200 text-[10px]" : "ml-auto bg-slate-100 text-slate-600 text-[10px]"}
+                                        >
+                                            {child.isYouth ? "Jugend" : "Senior"}
+                                        </Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
