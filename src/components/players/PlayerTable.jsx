@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function PlayerTable({ players, onAdd, onUpdate, onDelete }) {
+export default function PlayerTable({ players, onAdd, onUpdate, onDelete, readOnly = false }) {
     const [newName, setNewName] = useState("");
     const [newIsYouth, setNewIsYouth] = useState(false);
 
@@ -39,35 +39,37 @@ export default function PlayerTable({ players, onAdd, onUpdate, onDelete }) {
                 </div>
             </div>
 
-            {/* Add form */}
-            <div className="flex gap-2 items-center">
-                <Input
-                    placeholder="Spielername..."
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                    className="flex-1 h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400"
-                />
-                <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 cursor-pointer select-none whitespace-nowrap">
-                    <Checkbox
-                        checked={newIsYouth}
-                        onCheckedChange={setNewIsYouth}
-                        className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+            {/* Add form – only shown to the owner */}
+            {!readOnly && (
+                <div className="flex gap-2 items-center">
+                    <Input
+                        placeholder="Spielername..."
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                        className="flex-1 h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400"
                     />
-                    <span className="text-sm text-amber-800">Jugend</span>
-                </label>
-                <Button onClick={handleAdd} className="h-11 bg-slate-800 hover:bg-slate-700">
-                    <Plus className="w-4 h-4 mr-1" /> Hinzufügen
-                </Button>
-            </div>
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 cursor-pointer select-none whitespace-nowrap">
+                        <Checkbox
+                            checked={newIsYouth}
+                            onCheckedChange={setNewIsYouth}
+                            className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                        />
+                        <span className="text-sm text-amber-800">Jugend</span>
+                    </label>
+                    <Button onClick={handleAdd} className="h-11 bg-slate-800 hover:bg-slate-700">
+                        <Plus className="w-4 h-4 mr-1" /> Hinzufügen
+                    </Button>
+                </div>
+            )}
 
             {/* Player list */}
             <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <div className="grid grid-cols-[1fr,auto,auto,auto] gap-4 px-5 py-3 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <div className={`grid gap-4 px-5 py-3 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider ${readOnly ? "grid-cols-[1fr,auto,auto]" : "grid-cols-[1fr,auto,auto,auto]"}`}>
                     <span>Name</span>
                     <span className="text-center">Typ</span>
                     <span className="text-center">Anwesend</span>
-                    <span></span>
+                    {!readOnly && <span></span>}
                 </div>
                 <div className="divide-y divide-slate-100">
                     <AnimatePresence>
@@ -77,7 +79,7 @@ export default function PlayerTable({ players, onAdd, onUpdate, onDelete }) {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="grid grid-cols-[1fr,auto,auto,auto] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/50 transition-colors"
+                                className={`grid gap-4 px-5 py-3.5 items-center hover:bg-slate-50/50 transition-colors ${readOnly ? "grid-cols-[1fr,auto,auto]" : "grid-cols-[1fr,auto,auto,auto]"}`}
                             >
                 <span className={`font-medium ${player.is_present ? "text-slate-800" : "text-slate-400"}`}>
                   {player.name}
@@ -96,18 +98,21 @@ export default function PlayerTable({ players, onAdd, onUpdate, onDelete }) {
                                 <div className="flex justify-center">
                                     <Checkbox
                                         checked={player.is_present}
-                                        onCheckedChange={(checked) => onUpdate(player.id, { is_present: checked })}
+                                        onCheckedChange={readOnly ? undefined : (checked) => onUpdate(player.id, { is_present: checked })}
+                                        disabled={readOnly}
                                         className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                     />
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => onDelete(player.id)}
-                                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
+                                {!readOnly && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => onDelete(player.id)}
+                                        className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                )}
                             </motion.div>
                         ))}
                     </AnimatePresence>
